@@ -1,4 +1,5 @@
 Django
+mysqlclient
 python-decouple
 python-dotenv
 Pillow
