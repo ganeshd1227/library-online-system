@@ -1,0 +1,14 @@
+<div class="book-card">
+    {% if book.cover_image %}<img class="cover" src="{{ book.cover_thumb_url }}" alt="Cover of {{ book.title }}" width="320" height="230" decoding="async" {% if forloop.counter <= 4 %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %} onerror="this.onerror=null;this.src='{{ book.cover_image.url }}'">{% else %}<div class="cover"><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg></div>{% endif %}
+    <div class="body">
+        <div class="title">{{ book.title }}</div>
+        <div class="author">{{ book.author }} · {{ book.publication_year }}</div>
+        {% if book.category %}<div class="text-muted" style="font-size:.78rem">{{ book.category }}</div>{% endif %}
+        {% if book.description %}<div class="text-muted" style="font-size:.82rem">{{ book.description|truncatechars:80 }}</div>{% endif %}
+        <div>{% if book.available_copies > 0 %}<span class="pill pill-success">Available</span>{% else %}<span class="pill pill-danger">Unavailable</span>{% endif %}</div>
+        <div class="card-actions">
+            <a href="{% url 'books:detail' book.pk %}" class="btn btn-sm btn-secondary">View Details</a>
+            {% if book.has_readable_content %}<a href="{% url 'reading:reader' book.pk %}" class="btn btn-sm btn-primary">Read Online</a>{% endif %}
+        </div>
+    </div>
+</div>

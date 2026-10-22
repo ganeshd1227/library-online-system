@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block guest_content %}
+<div class="login-shell">
+    <aside class="login-brand" aria-hidden="true">
+        <div class="login-brand-inner">
+            <div class="login-logo"><svg class="icon"><use href="#i-book"/></svg><span>LibrarySys</span></div>
+            <h2>Where every page is within reach.</h2>
+            <ul class="login-points">
+                <li><svg class="icon"><use href="#i-book-open"/></svg><span>Read online, right where you left off</span></li>
+                <li><svg class="icon"><use href="#i-clock"/></svg><span>Your reading time, tracked quietly</span></li>
+                <li><svg class="icon"><use href="#i-bell"/></svg><span>Request a title and get notified</span></li>
+            </ul>
+        </div>
+    </aside>
+    <main class="login-panel" id="main-content">
+        <div class="login-card">
+            <div class="login-logo login-logo-compact"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>LibrarySys</span></div>
+            {% block auth_card %}{% endblock %}
+        </div>
+    </main>
+</div>
+{% endblock %}

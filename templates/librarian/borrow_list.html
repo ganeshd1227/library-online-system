@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Borrow Records{% endblock %}
+{% block page_title %}Borrow Records{% endblock %}
+{% block content %}
+<form method="get" class="search-bar">
+    <select name="status" class="form-input" onchange="this.form.submit()" style="max-width:200px">
+        <option value="">All Statuses</option>
+        {% for value, label in statuses %}<option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+</form>
+{% if records %}
+<div class="table-wrap"><table>
+    <thead><tr><th>User</th><th>Book</th><th>Status</th><th>Borrow Date</th><th>Due Date</th><th>Return Date</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for r in records %}
+        <tr>
+            <td>{{ r.user.get_full_name|default:r.user.username }}</td><td>{{ r.book.title }}</td>
+            <td>{% if r.status == "REQUESTED" %}<span class="pill pill-warning">Requested</span>{% elif r.status == "APPROVED" %}<span class="pill pill-success">Approved</span>{% elif r.status == "RETURNED" %}<span class="pill pill-muted">Returned</span>{% else %}<span class="pill pill-danger">Rejected</span>{% endif %}</td>
+            <td>{{ r.borrow_date|date:"M d, Y"|default:"—" }}</td><td>{{ r.due_date|default:"—" }}</td><td>{{ r.return_date|date:"M d, Y"|default:"—" }}</td>
+            <td><div class="flex gap-1">
+                {% if r.status == "REQUESTED" %}
+                    <form method="post" action="{% url 'borrowing:approve' r.pk %}" class="inline-form">{% csrf_token %}<button class="btn btn-sm btn-primary">Approve</button></form>
+                    <form method="post" action="{% url 'borrowing:reject' r.pk %}" class="inline-form">{% csrf_token %}<button class="btn btn-sm btn-danger">Reject</button></form>
+                {% elif r.status == "APPROVED" %}
+                    <form method="post" action="{% url 'borrowing:return' r.pk %}" class="inline-form">{% csrf_token %}<button class="btn btn-sm btn-secondary">Mark Returned</button></form>
+                {% else %}<span class="text-muted">—</span>{% endif %}
+            </div></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table></div>
+{% else %}<div class="empty-state"><span class="icon"><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg></span>No borrow records found.</div>{% endif %}
+{% endblock %}

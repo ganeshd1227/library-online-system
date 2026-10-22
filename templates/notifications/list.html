@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+{% block content %}
+{% if notifications %}
+<div class="mb-1" style="display:flex;gap:.5rem;flex-wrap:wrap">
+<form method="post" action="{% url 'notifications:mark_all_read' %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-ghost">Mark all as read</button></form>
+<form method="post" action="{% url 'notifications:clear_all' %}" data-confirm="Clear all your notifications?">{% csrf_token %}<button type="submit" class="btn btn-sm btn-danger">Clear all</button></form>
+</div>
+<div class="table-wrap"><table><tbody>
+{% for n in notifications %}
+    <tr class="notif-row" style="{% if not n.is_read %}font-weight:600;{% endif %}">
+        <td>{{ n.message }}</td><td class="text-muted">{{ n.created_at|timesince }} ago</td>
+        <td>{% if not n.is_read %}<form method="post" action="{% url 'notifications:mark_read' n.pk %}" class="inline-form">{% csrf_token %}<button class="btn btn-sm btn-secondary">Mark read</button></form>{% else %}<span class="pill pill-muted">Read</span>{% endif %}
+        <form method="post" action="{% url 'notifications:delete' n.pk %}" class="inline-form notif-delete">{% csrf_token %}<button class="btn btn-sm btn-ghost" title="Delete">Delete</button></form></td>
+    </tr>
+{% endfor %}
+</tbody></table></div>
+{% else %}<div class="empty-state"><span class="icon"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg></span>No notifications yet.</div>{% endif %}
+{% endblock %}

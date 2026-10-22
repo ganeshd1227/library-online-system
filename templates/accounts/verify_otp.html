@@ -1,0 +1,35 @@
+{% extends "accounts/auth_base.html" %}
+{% block title %}Enter verification code — LibrarySys{% endblock %}
+{% block auth_card %}
+<div class="otp-steps" aria-label="Step 2 of 3"><span class="otp-step done"></span><span class="otp-step active"></span><span class="otp-step"></span></div>
+<h1>Enter verification code</h1>
+<p class="subtitle">If <strong>{{ email }}</strong> is registered, we sent a code. It expires in {{ otp_expiry_minutes }} minutes.</p>
+<form method="post" novalidate>
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="{{ form.otp_code.id_for_label }}" class="sr-only">6-digit code</label>{{ form.otp_code }}
+        {% for error in form.otp_code.errors %}<div class="field-error" role="alert">{{ error }}</div>{% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary btn-block" data-loading="Verifying…">Verify code</button>
+</form>
+<form method="post" action="{% url 'accounts:resend_otp' %}" class="mt-2" style="text-align:center">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-ghost btn-sm" id="resend-btn" {% if cooldown_remaining %}disabled data-cooldown="{{ cooldown_remaining }}"{% endif %}>
+        Resend code{% if cooldown_remaining %} (<span id="resend-timer">{{ cooldown_remaining }}</span>s){% endif %}
+    </button>
+</form>
+<div class="auth-links"><a href="{% url 'accounts:forgot_password' %}">Use a different email</a></div>
+<script>
+(function () {
+    var btn = document.getElementById('resend-btn');
+    if (!btn || !btn.dataset.cooldown) return;
+    var remaining = parseInt(btn.dataset.cooldown, 10);
+    var span = document.getElementById('resend-timer');
+    var t = setInterval(function () {
+        remaining -= 1;
+        if (remaining <= 0) { clearInterval(t); btn.disabled = false; btn.textContent = 'Resend code'; return; }
+        span.textContent = remaining;
+    }, 1000);
+})();
+</script>
+{% endblock %}

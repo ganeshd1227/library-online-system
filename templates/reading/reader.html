@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Reading: {{ book.title }}{% endblock %}
+{% block page_title %}Online Reader{% endblock %}
+{% block body_class %}reader-mode{% endblock %}
+{% block extra_css %}{% if book.is_pdf %}<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>{% endif %}{% endblock %}
+{% block content %}
+<div class="reader-wrap" id="reader-root"
+     data-book-id="{{ book.pk }}"
+     data-is-pdf="{% if book.is_pdf %}true{% else %}false{% endif %}"
+     data-resume-position="{{ resume_position }}"
+     data-track-time="{% if track_time %}true{% else %}false{% endif %}"
+     data-books-url="{% url 'books:list' %}"
+     {% if book.is_pdf %}
+     data-pdf-url="{% url 'reading:pdf_stream' book.pk %}"
+     data-pdf-worker-src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
+     {% endif %}>
+
+{% if book.is_pdf %}
+    <div class="pdf-viewer" id="pdf-viewer">
+        <div class="pdf-stage" id="pdf-stage" tabindex="0" aria-label="PDF page: {{ book.title }}">
+            <div class="pdf-status" id="pdf-loading" role="status"><span class="spinner"></span><span id="pdf-loading-text">Opening book…</span></div>
+            <div class="pdf-status pdf-error" id="pdf-error" role="alert" hidden>
+                <p id="pdf-error-msg">Could not load the PDF.</p>
+                <div class="pdf-error-actions">
+                    <button type="button" id="pdf-retry" class="btn btn-sm btn-primary">Try again</button>
+                    <a href="{% url 'reading:pdf_stream' book.pk %}" target="_blank" rel="noopener" class="btn btn-sm btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-external"/></svg> Open in new tab</a>
+                </div>
+            </div>
+            <canvas id="pdf-canvas" hidden></canvas>
+        </div>
+
+        <div class="pdf-toolbar" id="pdf-toolbar" role="toolbar" aria-label="Reader controls">
+            <div class="rb-group">
+                <button type="button" id="pdf-prev" class="rb" title="Previous page (← / PgUp)" aria-label="Previous page"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+                <label class="rb-page"><span class="sr-only">Page number</span><input id="pdf-page-num" type="text" inputmode="numeric" pattern="[0-9]*" value="1" autocomplete="off" aria-label="Current page"><span aria-hidden="true">/</span><span id="pdf-page-count">–</span></label>
+                <button type="button" id="pdf-next" class="rb" title="Next page (→ / PgDn)" aria-label="Next page"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
+            </div>
+            <div class="rb-group">
+                <button type="button" id="pdf-zoom-out" class="rb" title="Zoom out (−)" aria-label="Zoom out"><svg class="icon" aria-hidden="true"><use href="#i-zoom-out"/></svg></button>
+                <span class="rb-zoom" id="pdf-zoom-label" aria-live="polite">100%</span>
+                <button type="button" id="pdf-zoom-in" class="rb" title="Zoom in (+)" aria-label="Zoom in"><svg class="icon" aria-hidden="true"><use href="#i-zoom-in"/></svg></button>
+            </div>
+            <div class="rb-group">
+                <button type="button" id="pdf-fit-width" class="rb" data-fit="width" title="Fit to width (W)" aria-label="Fit to width"><svg class="icon" aria-hidden="true"><use href="#i-fit-width"/></svg></button>
+                <button type="button" id="pdf-fit-height" class="rb" data-fit="height" title="Fit to height (H)" aria-label="Fit to height"><svg class="icon" aria-hidden="true"><use href="#i-fit-height"/></svg></button>
+                <button type="button" id="pdf-fit-page" class="rb" data-fit="page" title="Fit to page (P)" aria-label="Fit to page"><svg class="icon" aria-hidden="true"><use href="#i-fit-page"/></svg></button>
+                <button type="button" id="pdf-actual" class="rb rb-text" data-fit="actual" title="Actual size (1)" aria-label="Actual size">1:1</button>
+            </div>
+            <div class="rb-group">
+                {% if track_time %}<span class="rb-timer" title="Reading time"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><span id="reader-timer" class="reader-timer">00:00:00</span></span>{% endif %}
+                <button type="button" id="toggle-fullscreen" class="rb" title="Full screen (F)" aria-label="Full screen" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-maximize"/></svg></button>
+                <button type="button" id="pdf-hide-controls" class="rb" title="Hide controls (C)" aria-label="Hide controls"><svg class="icon" aria-hidden="true"><use href="#i-eye-off"/></svg></button>
+                <button type="button" id="stop-reading-btn" class="rb rb-close" data-compact="1" title="{% if track_time %}Stop reading and close{% else %}Close reader{% endif %}" aria-label="Close reader"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+            </div>
+        </div>
+        <button type="button" id="pdf-show-controls" class="rb pdf-fab" title="Show controls (C)" aria-label="Show controls" hidden><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg></button>
+    </div>
+{% else %}
+    <div class="reader-header">
+        <a href="{% url 'books:detail' book.pk %}" class="btn btn-sm btn-ghost" title="Back to book"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg> Back</a>
+        <div class="reader-title">
+            <h2>{{ book.title }}</h2>
+            <p class="text-muted">by {{ book.author }}</p>
+        </div>
+        <div class="reader-toolbar">
+            <button id="toggle-dark-mode" class="btn btn-sm btn-ghost" type="button"><svg class="icon" aria-hidden="true"><use href="#i-contrast"/></svg> Contrast</button>
+            <button id="toggle-fullscreen" class="btn btn-sm btn-ghost" type="button" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-maximize"/></svg> Full screen</button>
+            <button id="stop-reading-btn" class="btn btn-sm btn-secondary" type="button"><svg class="icon" aria-hidden="true"><use href="#i-square"/></svg> {% if track_time %}Stop reading{% else %}Exit reader{% endif %}</button>
+        </div>
+    </div>
+    <div class="reader-layout">
+        <div class="reader-main">
+            <p class="help-text mb-1">
+                Select any text to highlight it. Note: copy-protection here is a UI-level
+                convenience only — it does not provide real DRM.
+            </p>
+            <div id="reader-content" class="reader-content">
+                {{ book.content_text|safe }}
+            </div>
+            {{ highlights_json|json_script:"highlights-data" }}
+        </div>
+        {% if track_time %}
+        <aside class="reader-side" aria-label="Reading timer">
+            <div class="reader-side-label"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg> Reading time</div>
+            <div id="reader-timer" class="reader-timer">00:00:00</div>
+        </aside>
+        {% endif %}
+    </div>
+{% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+{% if book.is_pdf %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" referrerpolicy="no-referrer" crossorigin="anonymous"></script>
+{% endif %}
+<script src="{% static 'js/reader.js' %}"></script>
+{% endblock %}

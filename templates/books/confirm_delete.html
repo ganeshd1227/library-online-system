@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Delete Book{% endblock %}
+{% block page_title %}Delete Book{% endblock %}
+{% block content %}
+<div class="card" style="max-width:480px">
+    <h2>Delete "{{ book.title }}"?</h2>
+    <p>This will permanently remove the book record. This cannot be undone.</p>
+    <form method="post">{% csrf_token %}
+        <div class="form-actions"><button type="submit" class="btn btn-danger">Yes, Delete</button><a href="{% url 'books:detail' book.pk %}" class="btn btn-ghost">Cancel</a></div>
+    </form>
+</div>
+{% endblock %}

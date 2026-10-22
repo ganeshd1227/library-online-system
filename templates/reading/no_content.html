@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }}{% endblock %}
+{% block page_title %}{{ book.title }}{% endblock %}
+{% block content %}
+<div class="empty-state">
+    <span class="icon"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></span>
+    This book doesn't have online reading content yet (no PDF or text uploaded).
+    <div class="mt-2"><a href="{% url 'books:detail' book.pk %}" class="btn btn-ghost">Back to Book</a></div>
+</div>
+{% endblock %}

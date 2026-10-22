@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Librarian Dashboard{% endblock %}
+{% block page_title %}Librarian Dashboard{% endblock %}
+{% block content %}
+<div class="stat-grid">
+    <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></span><div><div class="stat-value">{{ stats.total_books }}</div><div class="stat-label">Total Books</div></div></div>
+    <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg></span><div><div class="stat-value">{{ stats.available_books }}</div><div class="stat-label">Available Books</div></div></div>
+    <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-repeat"/></svg></span><div><div class="stat-value">{{ stats.borrowed_books }}</div><div class="stat-label">Borrowed Books</div></div></div>
+    <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg></span><div><div class="stat-value">{{ stats.total_users }}</div><div class="stat-label">Total Users</div></div></div>
+    <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-dot"/></svg></span><div><div class="stat-value">{{ stats.active_users }}</div><div class="stat-label">Active Users</div></div></div>
+    <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg></span><div><div class="stat-value">{{ stats.active_sessions }}</div><div class="stat-label">Active Reading Sessions</div></div></div>
+</div>
+<div class="card">
+    <h2>Quick Actions</h2>
+    <div class="flex gap-2" style="flex-wrap:wrap">
+        <a href="{% url 'accounts:user_create' %}" class="btn btn-primary">+ Add User</a>
+        <a href="{% url 'books:create' %}" class="btn btn-secondary">+ Add Book</a>
+        <a href="{% url 'borrowing:list' %}" class="btn btn-ghost">Borrow Records</a>
+        <a href="{% url 'books:requests_list' %}" class="btn btn-ghost">Book Requests</a>
+    </div>
+</div>
+<div class="card">
+    <h2>Recent Notifications</h2>
+    {% if notifications %}<div class="table-wrap"><table>{% for n in notifications %}<tr><td>{{ n.message }}</td><td class="text-muted">{{ n.created_at|timesince }} ago</td></tr>{% endfor %}</table></div>
+    {% else %}<p class="text-muted">No recent notifications.</p>{% endif %}
+</div>
+{% endblock %}

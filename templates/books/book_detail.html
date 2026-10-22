@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }}{% endblock %}
+{% block page_title %}{{ book.title }}{% endblock %}
+{% block content %}
+<div class="card" style="display:flex; gap:2rem; flex-wrap:wrap">
+    <div style="flex:0 0 200px; max-width:100%">
+        {% if book.cover_image %}<img src="{{ book.cover_image.url }}" alt="Cover of {{ book.title }}" width="400" height="560" fetchpriority="high" decoding="async" style="width:100%; height:auto; aspect-ratio:5/7; object-fit:cover; border-radius:8px;">
+        {% else %}<div class="book-card"><div class="cover" style="height:280px"><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg></div></div>{% endif %}
+    </div>
+    <div style="flex:1; min-width:250px">
+        <h2>{{ book.title }}</h2>
+        <p class="text-muted">by {{ book.author }} · {{ book.publication_year }} · {{ book.category|default:"Uncategorized" }}</p>
+        <p>{{ book.description|default:"No description available." }}</p>
+        <p>{% if book.available_copies > 0 %}<span class="pill pill-success">Available ({{ book.available_copies }}/{{ book.total_copies }})</span>{% else %}<span class="pill pill-danger">Unavailable</span>{% endif %}</p>
+        <div class="flex gap-2 mt-2" style="flex-wrap:wrap">
+            {% if book.has_readable_content %}<a href="{% url 'reading:reader' book.pk %}" class="btn btn-primary"><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg> Read Online</a>
+            {% else %}<span class="text-muted">No online reading content for this book yet.</span>{% endif %}
+            {% if user.is_user_role %}
+                <form method="post" action="{% url 'borrowing:request' book.pk %}" class="inline-form">{% csrf_token %}<button type="submit" class="btn btn-secondary">Request to Borrow</button></form>
+            {% endif %}
+            {% if user.is_librarian_role or user.is_admin_role %}
+                <a href="{% url 'books:edit' book.pk %}" class="btn btn-secondary">Edit</a>
+                <a href="{% url 'books:delete' book.pk %}" class="btn btn-danger">Delete</a>
+            {% endif %}
+            <a href="{% url 'books:list' %}" class="btn btn-ghost"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg> Books</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

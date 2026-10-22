@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}All Books{% endblock %}
+{% block page_title %}Books{% endblock %}
+{% block content %}
+<form method="get" class="search-bar">
+    <input type="text" name="q" class="form-input" placeholder="Search title or author..." value="{{ form.q.value|default:'' }}">
+    <input type="text" name="year" class="form-input" placeholder="Year" value="{{ form.year.value|default:'' }}" style="max-width:110px">
+    <select name="availability" class="form-input" style="max-width:170px">
+        <option value="">Any Availability</option>
+        <option value="AVAILABLE" {% if form.availability.value == "AVAILABLE" %}selected{% endif %}>Available only</option>
+    </select>
+    <input type="hidden" name="category" value="{{ form.category.value|default:'' }}">
+    <button type="submit" class="btn btn-secondary">Filter</button>
+    {% if user.is_librarian_role or user.is_admin_role %}<a href="{% url 'books:create' %}" class="btn btn-primary">+ Add Book</a>{% endif %}
+</form>
+
+{% if categories %}
+<div class="chip-row">
+    <a href="{% url 'books:list' %}" class="chip {% if not form.category.value %}active{% endif %}">All</a>
+    {% for c in categories %}<a href="?category={{ c|urlencode }}" class="chip {% if form.category.value == c %}active{% endif %}">{{ c }}</a>{% endfor %}
+</div>
+{% endif %}
+
+{% if page_obj.object_list %}
+<div class="book-grid">{% for book in page_obj %}{% include "partials/book_card.html" %}{% endfor %}</div>
+{% include "partials/pagination.html" %}
+{% else %}<div class="empty-state"><span class="icon"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></span>No books match your filters.</div>{% endif %}
+{% endblock %}

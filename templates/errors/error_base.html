@@ -1,0 +1,27 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Something went wrong{% endblock %} — LibrarySys</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Plus+Jakarta+Sans:wght@400;600&display=swap" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/premium.css' %}">
+    <script>try{var t=localStorage.getItem('lms-theme');if(t!=='dark'&&t!=='light')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+</head>
+<body>
+{% include "partials/icons.html" %}
+<main class="error-page" id="main-content">
+    <div class="error-card">
+        <div class="error-icon"><svg class="icon" aria-hidden="true"><use href="#{% block icon %}i-book{% endblock %}"/></svg></div>
+        <p class="error-code">{% block code %}Error{% endblock %}</p>
+        <h1>{% block heading %}Something went wrong{% endblock %}</h1>
+        <p class="error-text">{% block message %}An unexpected problem occurred. Please try again.{% endblock %}</p>
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">Go to home</a>
+            <a href="javascript:history.back()" class="btn btn-secondary">Go back</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

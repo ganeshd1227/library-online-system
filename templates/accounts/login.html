@@ -1,0 +1,23 @@
+{% extends "accounts/auth_base.html" %}
+{% block title %}Sign in — LibrarySys{% endblock %}
+{% block auth_card %}
+<h1>Welcome back</h1>
+<p class="subtitle">Sign in with your email, library card ID or phone number.</p>
+<form method="post" novalidate id="login-form">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="{{ form.identifier.id_for_label }}">{{ form.identifier.label }}</label>
+        <div class="input-icon"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>{{ form.identifier }}</div>
+        {% for error in form.identifier.errors %}<div class="field-error" role="alert">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="form-group">
+        <label for="{{ form.password.id_for_label }}">Password</label>
+        <div class="input-icon"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>{{ form.password }}
+            <button type="button" class="pw-toggle" data-toggle-password aria-label="Show password" title="Show password"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg></button></div>
+        {% for error in form.password.errors %}<div class="field-error" role="alert">{{ error }}</div>{% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary btn-block" id="login-submit" data-loading="Signing in…">Sign in</button>
+</form>
+<div class="auth-links"><a href="{% url 'accounts:forgot_password' %}">Forgot your password?</a></div>
+<p class="help-text">Accounts are created by library staff. If you don't have one, please contact your librarian.</p>
+{% endblock %}

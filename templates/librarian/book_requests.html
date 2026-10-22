@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Book Requests{% endblock %}
+{% block page_title %}Book Requests{% endblock %}
+{% block content %}
+{% if page_obj.object_list %}
+<div class="table-wrap"><table>
+    <thead><tr><th>Title</th><th>Author</th><th>Year</th><th>Requested By</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for r in page_obj %}
+        <tr>
+            <td>{{ r.requested_title }}</td><td>{{ r.requested_author|default:"—" }}</td><td>{{ r.requested_year|default:"—" }}</td>
+            <td>{{ r.user.get_full_name|default:r.user.username }}</td>
+            <td>{% if r.status == "PENDING" %}<span class="pill pill-warning">Pending</span>{% elif r.status == "FULFILLED" %}<span class="pill pill-success">Fulfilled</span>{% else %}<span class="pill pill-danger">Rejected</span>{% endif %}</td>
+            <td class="text-muted">{{ r.request_date|date:"M d, Y" }}</td>
+            <td>{% if r.status == "PENDING" %}<div class="flex gap-1">
+                <form method="post" action="{% url 'books:requests_resolve' r.pk 'fulfill' %}" class="inline-form">{% csrf_token %}<button class="btn btn-sm btn-primary">Fulfill</button></form>
+                <form method="post" action="{% url 'books:requests_resolve' r.pk 'reject' %}" class="inline-form">{% csrf_token %}<button class="btn btn-sm btn-danger">Reject</button></form>
+            </div>{% else %}<span class="text-muted">Handled</span>{% endif %}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table></div>
+{% include "partials/pagination.html" %}
+{% else %}<div class="empty-state"><span class="icon"><svg class="icon" aria-hidden="true"><use href="#i-inbox"/></svg></span>No book requests yet.</div>{% endif %}
+{% endblock %}

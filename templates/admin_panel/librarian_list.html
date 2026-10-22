@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Librarians{% endblock %}
+{% block page_title %}Librarians{% endblock %}
+{% block content %}
+<div class="flex gap-2" style="justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap">
+    <form method="get" class="search-bar" style="margin-bottom:0">
+        <input type="text" name="q" class="form-input" placeholder="Search by name, email, ID..." value="{{ query }}">
+        <button type="submit" class="btn btn-secondary">Search</button>
+    </form>
+    <a href="{% url 'accounts:librarian_create' %}" class="btn btn-primary">+ Add Librarian</a>
+</div>
+{% if page_obj.object_list %}
+<div class="table-wrap"><table>
+    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Phone</th><th>Employee ID</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for librarian in page_obj %}
+        <tr>
+            <td>{{ librarian.get_full_name|default:librarian.username }}</td>
+            <td>{{ librarian.email }}</td>
+            <td><span class="pill pill-warning">Librarian</span></td>
+            <td>{{ librarian.phone_number|default:"—" }}</td>
+            <td>{{ librarian.employee_id|default:"—" }}</td>
+            <td>{% if librarian.is_active %}<span class="pill pill-success">Active</span>{% else %}<span class="pill pill-danger">Inactive</span>{% endif %}</td>
+            <td class="text-muted">{{ librarian.created_at|date:"M d, Y" }}</td>
+            <td><div class="flex gap-1">
+                <a href="{% url 'accounts:librarian_edit' librarian.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+                <form method="post" action="{% url 'accounts:librarian_toggle_status' librarian.pk %}" class="inline-form">{% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-ghost">{% if librarian.is_active %}Deactivate{% else %}Activate{% endif %}</button></form>
+                <a href="{% url 'accounts:librarian_delete' librarian.pk %}" class="btn btn-sm btn-danger">Delete</a>
+            </div></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table></div>
+{% include "partials/pagination.html" %}
+{% else %}<div class="empty-state"><span class="icon"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg></span>No librarians found.</div>{% endif %}
+{% endblock %}

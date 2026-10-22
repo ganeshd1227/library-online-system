@@ -1,0 +1,5 @@
+Django==4.2.14
+mysqlclient==2.2.4
+python-decouple==3.8
+Pillow==10.4.0
+bleach==6.1.0

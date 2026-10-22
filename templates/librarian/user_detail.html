@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ member.get_full_name }}{% endblock %}
+{% block page_title %}{{ member.get_full_name|default:member.username }}{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>Account Info</h2>
+    <p><strong>Email:</strong> {{ member.email }} &nbsp; <strong>Phone:</strong> {{ member.phone_number|default:"—" }} &nbsp; <strong>Card ID:</strong> {{ member.library_card_id|default:"—" }}</p>
+    <p><strong>Status:</strong> {% if member.is_active %}<span class="pill pill-success">Active</span>{% else %}<span class="pill pill-danger">Inactive</span>{% endif %}</p>
+    <p><strong>Total Reading Time:</strong> {{ total_seconds }} seconds</p>
+</div>
+<div class="card">
+    <h2>Borrowed Books</h2>
+    {% if borrowed %}<div class="table-wrap"><table>
+        <thead><tr><th>Book</th><th>Status</th><th>Borrow Date</th><th>Due Date</th><th>Return Date</th></tr></thead>
+        <tbody>{% for b in borrowed %}<tr><td>{{ b.book.title }}</td><td>{{ b.get_status_display }}</td><td>{{ b.borrow_date|date:"M d, Y"|default:"—" }}</td><td>{{ b.due_date|default:"—" }}</td><td>{{ b.return_date|date:"M d, Y"|default:"—" }}</td></tr>{% endfor %}</tbody>
+    </table></div>{% else %}<p class="text-muted">No borrow records.</p>{% endif %}
+</div>
+<div class="card">
+    <h2>Reading History</h2>
+    {% if sessions %}<div class="table-wrap"><table>
+        <thead><tr><th>Book</th><th>Started</th><th>Duration</th></tr></thead>
+        <tbody>{% for s in sessions %}<tr><td>{{ s.book.title }}</td><td>{{ s.started_at|date:"M d, Y H:i" }}</td><td>{% if s.duration_seconds is not None %}{{ s.duration_seconds }}s{% else %}in progress{% endif %}</td></tr>{% endfor %}</tbody>
+    </table></div>{% else %}<p class="text-muted">No reading sessions yet.</p>{% endif %}
+</div>
+{% endblock %}

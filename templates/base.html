@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Library Management System{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"></noscript>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/premium.css' %}">
+    <meta name="color-scheme" content="light dark">
+    <!-- Applied before first paint to avoid a light-mode "flash" -->
+    <script>
+        (function () {
+            var t = null;
+            try { t = localStorage.getItem('lms-theme'); } catch (e) {}
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}" data-user-theme="{{ user.theme_preference|default:'' }}">
+{% include "partials/icons.html" %}
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+{% if user.is_authenticated %}
+<div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg> <span>LibrarySys</span></div>
+        <nav class="sidebar-nav">
+            {% if user.is_admin_role %}
+                <a href="{% url 'accounts:admin_dashboard' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg> Dashboard</a>
+                <a href="{% url 'accounts:librarian_list' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg> Librarians</a>
+                <a href="{% url 'accounts:user_list' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg> Users</a>
+                <a href="{% url 'books:list' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg> Books</a>
+                <a href="{% url 'borrowing:list' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-repeat"/></svg> Borrow Records</a>
+                <a href="{% url 'books:requests_list' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg> Book Requests</a>
+            {% elif user.is_librarian_role %}
+                <a href="{% url 'accounts:librarian_dashboard' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg> Dashboard</a>
+                <a href="{% url 'accounts:user_list' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg> Users</a>
+                <a href="{% url 'books:list' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg> Books</a>
+                <a href="{% url 'borrowing:list' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-repeat"/></svg> Borrow Records</a>
+                <a href="{% url 'books:requests_list' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg> Book Requests</a>
+            {% else %}
+                <a href="{% url 'accounts:user_dashboard' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg> Dashboard</a>
+                <a href="{% url 'books:list' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg> All Books</a>
+                <a href="{% url 'books:search' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg> Search Books</a>
+            {% endif %}
+            <a href="{% url 'notifications:list' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg> Notifications
+                {% if unread_notification_count %}<span class="badge">{{ unread_notification_count }}</span>{% endif %}
+            </a>
+            <a href="{% url 'accounts:change_password' %}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg> Change Password</a>
+        </nav>
+    </aside>
+
+    <div class="main-area">
+        <header class="topbar">
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
+            <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+            <div class="topbar-actions">
+                <div class="notif-wrap">
+                    <button id="notif-toggle" class="theme-toggle" type="button" title="Notifications" aria-label="Notifications" aria-haspopup="true" aria-expanded="false" aria-controls="notif-panel" data-feed-url="{% url 'notifications:unread_feed' %}">
+                        <svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg>{% if unread_notification_count %}<span class="notif-dot" id="notif-dot">{{ unread_notification_count }}</span>{% endif %}
+                    </button>
+                    <div id="notif-panel" class="notif-panel" hidden role="region" aria-label="Recent notifications">
+                        <div class="notif-head"><strong>Notifications</strong><a href="{% url 'notifications:list' %}">View all</a></div>
+                        <ul id="notif-list" class="notif-list"></ul>
+                    </div>
+                </div>
+                <button id="theme-toggle" class="theme-toggle" type="button" title="Toggle dark mode" aria-label="Toggle dark mode">
+                    <span class="icon-light"><svg class="icon" aria-hidden="true"><use href="#i-sun"/></svg></span><span class="icon-dark"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg></span>
+                </button>
+                <div class="topbar-user">
+                    <span>{{ user.get_full_name|default:user.username }} <em>({% if user.is_superuser %}ADMIN{% else %}{{ user.role|default:"ADMIN" }}{% endif %})</em></span>
+                    <form method="post" action="{% url 'accounts:logout' %}" class="inline-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-ghost">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <main class="content" id="main-content" tabindex="-1">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+{% else %}
+    <div class="guest-topbar">
+        <button id="theme-toggle" class="theme-toggle" type="button" title="Toggle dark mode" aria-label="Toggle dark mode">
+            <span class="icon-light"><svg class="icon" aria-hidden="true"><use href="#i-sun"/></svg></span><span class="icon-dark"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg></span>
+        </button>
+    </div>
+    {% block guest_content %}{% endblock %}
+{% endif %}
+
+{% if messages %}<div id="django-messages" hidden>{% for message in messages %}<span data-type="{{ message.tags }}">{{ message }}</span>{% endfor %}</div>{% endif %}
+<script src="{% static 'js/theme.js' %}"></script>
+<script src="{% static 'js/toast.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

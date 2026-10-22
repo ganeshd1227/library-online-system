@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Search Books{% endblock %}
+{% block page_title %}Search Books{% endblock %}
+{% block content %}
+<form method="get" class="search-bar">
+    <input type="text" name="q" class="form-input" placeholder="Book name or author..." value="{{ form.q.value|default:'' }}">
+    <input type="text" name="category" class="form-input" placeholder="Category" value="{{ form.category.value|default:'' }}">
+    <input type="text" name="year" class="form-input" placeholder="Publication year" value="{{ form.year.value|default:'' }}">
+    <select name="availability" class="form-input" style="max-width:170px">
+        <option value="">Any Availability</option>
+        <option value="AVAILABLE" {% if form.availability.value == "AVAILABLE" %}selected{% endif %}>Available only</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+{% if page_obj.object_list %}
+<div class="book-grid">{% for book in page_obj %}{% include "partials/book_card.html" %}{% endfor %}</div>
+{% include "partials/pagination.html" %}
+{% elif searched %}
+<div class="empty-state">
+    <span class="icon"><svg class="icon" aria-hidden="true"><use href="#i-inbox"/></svg></span>Book not found in the library.
+    <div class="card" style="max-width:420px; margin:1rem auto 0; text-align:left">
+        <h3>Request this book</h3>
+        <form method="post" action="{% url 'books:request_book' %}">
+            {% csrf_token %}
+            {% for field in request_form %}<div class="form-group"><label>{{ field.label }}</label>{{ field }}</div>{% endfor %}
+            <button type="submit" class="btn btn-primary">Request this book</button>
+        </form>
+    </div>
+</div>
+{% else %}<p class="text-muted">Enter a title, author, category, or year to search the catalogue.</p>{% endif %}
+{% endblock %}
